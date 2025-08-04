@@ -7,6 +7,8 @@
 <a href="https://huggingface.co/TencentARC/FreeSplatter"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model_Card-Huggingface-orange"></a> 
 <a href="https://huggingface.co/spaces/TencentARC/FreeSplatter"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Gradio%20Demo-Huggingface-orange"></a> <br>
 
+**ICCV 2025**
+
 </div>
 
 ---
