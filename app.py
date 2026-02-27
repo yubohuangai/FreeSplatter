@@ -3,6 +3,14 @@ if 'OMP_NUM_THREADS' not in os.environ:
     os.environ['OMP_NUM_THREADS'] = '16'
 import torch
 import gradio as gr
+
+import gradio_client.utils as _gc_utils
+_original_get_type = _gc_utils.get_type
+def _patched_get_type(schema):
+    if not isinstance(schema, dict):
+        return str(schema)
+    return _original_get_type(schema)
+_gc_utils.get_type = _patched_get_type
 from functools import partial
 from huggingface_hub import snapshot_download
 
