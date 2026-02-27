@@ -5,12 +5,12 @@ import torch
 import gradio as gr
 
 import gradio_client.utils as _gc_utils
-_original_get_type = _gc_utils.get_type
-def _patched_get_type(schema):
+_original_json_schema_to_python_type = _gc_utils._json_schema_to_python_type
+def _patched_json_schema_to_python_type(schema, defs=None):
     if not isinstance(schema, dict):
-        return str(schema)
-    return _original_get_type(schema)
-_gc_utils.get_type = _patched_get_type
+        return "Any"
+    return _original_json_schema_to_python_type(schema, defs)
+_gc_utils._json_schema_to_python_type = _patched_json_schema_to_python_type
 from functools import partial
 from huggingface_hub import snapshot_download
 
