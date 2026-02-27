@@ -116,7 +116,8 @@ class FreeSplatterRunner:
             torch_dtype=torch.float16,
             use_safetensors=True,
         )
-        pipeline.enable_sequential_cpu_offload(gpu_id=self.device_hunyuan.index)
+        pipeline.__class__.model_cpu_offload_seq = "vision_encoder->vision_encoder_2->unet->vae"
+        pipeline.enable_model_cpu_offload(gpu_id=self.device_hunyuan.index)
         self.hunyuan3d_mvd_std = pipeline
 
         # freesplatter
