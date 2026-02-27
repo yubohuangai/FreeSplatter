@@ -3,14 +3,6 @@ if 'OMP_NUM_THREADS' not in os.environ:
     os.environ['OMP_NUM_THREADS'] = '16'
 import torch
 import gradio as gr
-
-import gradio_client.utils as _gc_utils
-_original_json_schema_to_python_type = _gc_utils._json_schema_to_python_type
-def _patched_json_schema_to_python_type(schema, defs=None):
-    if not isinstance(schema, dict):
-        return "Any"
-    return _original_json_schema_to_python_type(schema, defs)
-_gc_utils._json_schema_to_python_type = _patched_json_schema_to_python_type
 from functools import partial
 from huggingface_hub import snapshot_download
 
@@ -24,13 +16,8 @@ os.makedirs('./ckpts/Hunyuan3D-1', exist_ok=True)
 snapshot_download('tencent/Hunyuan3D-1', repo_type='model', local_dir='./ckpts/Hunyuan3D-1')
 
 torch.set_grad_enabled(False)
-main_device = torch.device('cuda:0')
-runner = FreeSplatterRunner(
-    device_main=main_device,
-    device_diff=torch.device('cuda:1'),
-    device_hunyuan=torch.device('cuda:2'),
-    device_rembg=torch.device('cpu'),
-)
+device = torch.device('cuda')
+runner = FreeSplatterRunner(device)
 
 
 _HEADER_ = '''
@@ -119,9 +106,8 @@ with gr.Blocks(analytics_enabled=False, title='FreeSplatter Demo', theme=gr.them
 
     gr.Markdown(_CITE_)
 
-demo.queue(api_open=False).launch(
-    share=True,
-    show_api=False,
+demo.queue().launch(
+    share=False, 
     server_name="0.0.0.0", 
     server_port=41137, 
     ssl_verify=False,
