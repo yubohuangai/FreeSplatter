@@ -96,7 +96,8 @@ class FreeSplatterRunner:
         pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(
             pipeline.scheduler.config, timestep_spacing='trailing'
         )
-        self.zero123plus_v11 = pipeline.to(self.device_diff)
+        pipeline.enable_model_cpu_offload(gpu_id=self.device_diff.index)
+        self.zero123plus_v11 = pipeline
 
         pipeline = DiffusionPipeline.from_pretrained(
             "sudo-ai/zero123plus-v1.2", 
@@ -107,14 +108,16 @@ class FreeSplatterRunner:
         pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(
             pipeline.scheduler.config, timestep_spacing='trailing'
         )
-        self.zero123plus_v12 = pipeline.to(self.device_diff)
+        pipeline.enable_model_cpu_offload(gpu_id=self.device_diff.index)
+        self.zero123plus_v12 = pipeline
 
         pipeline = HunYuan3D_MVD_Std_Pipeline.from_pretrained(
             './ckpts/Hunyuan3D-1/mvd_std',
             torch_dtype=torch.float16,
             use_safetensors=True,
         )
-        self.hunyuan3d_mvd_std = pipeline.to(self.device_hunyuan)
+        pipeline.enable_model_cpu_offload(gpu_id=self.device_hunyuan.index)
+        self.hunyuan3d_mvd_std = pipeline
 
         # freesplatter
         config_file = 'configs/freesplatter-object.yaml'
