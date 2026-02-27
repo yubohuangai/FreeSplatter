@@ -201,10 +201,11 @@ def reconstruct_object(freesplatter, images, alphas, device, output_dir, mesh_re
     intrinsics[:, 1, 2] = fxfycxcy[:, 3]
 
     out_mesh = trimesh.load(str(mesh_path), process=False)
-    out_mesh = optimize_mesh(
-        out_mesh, images_bake, alphas_bake.squeeze(-1),
-        c2ws_fusion[cam_inds].inverse(), intrinsics,
-        simplify=mesh_reduction, verbose=False)
+    with torch.enable_grad():
+        out_mesh = optimize_mesh(
+            out_mesh, images_bake, alphas_bake.squeeze(-1),
+            c2ws_fusion[cam_inds].inverse(), intrinsics,
+            simplify=mesh_reduction, verbose=False)
     mesh_fine_path = os.path.join(output_dir, 'mesh.glb')
     out_mesh.export(mesh_fine_path)
     print(f'Saved optimized mesh at {mesh_fine_path}')
