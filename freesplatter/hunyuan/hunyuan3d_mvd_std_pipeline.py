@@ -307,7 +307,7 @@ class HunYuan3D_MVD_Std_Pipeline(diffusers.DiffusionPipeline):
         if not self.prepare_init:
             self.prepare()
 
-        here = dict(device=self._execution_device, dtype=self.vae.dtype)
+        here = dict(device=self.vae.device, dtype=self.vae.dtype)
             
         batch_size = 1
         num_images_per_prompt = 1

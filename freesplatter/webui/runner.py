@@ -116,9 +116,9 @@ class FreeSplatterRunner:
             torch_dtype=torch.float16,
             use_safetensors=True,
         )
-        pipeline.__class__.model_cpu_offload_seq = "vision_encoder->vision_encoder_2->unet->vae"
-        pipeline.enable_model_cpu_offload(gpu_id=self.device_hunyuan.index)
-        self.hunyuan3d_mvd_std = pipeline
+        self.hunyuan3d_mvd_std = pipeline.to(self.device_hunyuan)
+        self.hunyuan3d_mvd_std.enable_vae_tiling()
+        self.hunyuan3d_mvd_std.enable_attention_slicing(1)
 
         # freesplatter
         config_file = 'configs/freesplatter-object.yaml'
