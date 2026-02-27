@@ -71,15 +71,19 @@ def save_gaussian(latent, gs_vis_path, model, opacity_threshold=None, pad_2dgs_s
 
 
 class FreeSplatterRunner:
-    def __init__(self, device):
-        self.device = device
+    def __init__(self, device_main, device_diff=None, device_hunyuan=None, device_rembg=None):
+        self.device = device_main
+        self.device_main = device_main
+        self.device_diff = device_diff if device_diff is not None else device_main
+        self.device_hunyuan = device_hunyuan if device_hunyuan is not None else device_main
+        self.device_rembg = device_rembg if device_rembg is not None else device_main
 
         # background remover
         self.rembg = AutoModelForImageSegmentation.from_pretrained(
             "briaai/RMBG-2.0",
             trust_remote_code=True,
             cache_dir='ckpts/',
-        ).to(device)
+        ).to(self.device_rembg)
         self.rembg.eval()
 
         # diffusion models
@@ -92,7 +96,7 @@ class FreeSplatterRunner:
         pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(
             pipeline.scheduler.config, timestep_spacing='trailing'
         )
-        self.zero123plus_v11 = pipeline.to(device)
+        self.zero123plus_v11 = pipeline.to(self.device_diff)
 
         pipeline = DiffusionPipeline.from_pretrained(
             "sudo-ai/zero123plus-v1.2", 
@@ -103,14 +107,14 @@ class FreeSplatterRunner:
         pipeline.scheduler = EulerAncestralDiscreteScheduler.from_config(
             pipeline.scheduler.config, timestep_spacing='trailing'
         )
-        self.zero123plus_v12 = pipeline.to(device)
+        self.zero123plus_v12 = pipeline.to(self.device_diff)
 
         pipeline = HunYuan3D_MVD_Std_Pipeline.from_pretrained(
             './ckpts/Hunyuan3D-1/mvd_std',
             torch_dtype=torch.float16,
             use_safetensors=True,
         )
-        self.hunyuan3d_mvd_std = pipeline.to(device)
+        self.hunyuan3d_mvd_std = pipeline.to(self.device_hunyuan)
 
         # freesplatter
         config_file = 'configs/freesplatter-object.yaml'
@@ -121,7 +125,7 @@ class FreeSplatterRunner:
             for key in f.keys():
                 state_dict[key] = f.get_tensor(key)
         model.load_state_dict(state_dict, strict=True)
-        self.freesplatter = model.eval().to(device)
+        self.freesplatter = model.eval().to(self.device_main)
 
         config_file = 'configs/freesplatter-object-2dgs.yaml'
         ckpt_path = hf_hub_download('TencentARC/FreeSplatter', repo_type='model', filename='freesplatter-object-2dgs.safetensors', local_dir='./ckpts/FreeSplatter')
@@ -131,7 +135,7 @@ class FreeSplatterRunner:
             for key in f.keys():
                 state_dict[key] = f.get_tensor(key)
         model.load_state_dict(state_dict, strict=True)
-        self.freesplatter_2dgs = model.eval().to(device)
+        self.freesplatter_2dgs = model.eval().to(self.device_main)
 
         config_file = 'configs/freesplatter-scene.yaml'
         ckpt_path = hf_hub_download('TencentARC/FreeSplatter', repo_type='model', filename='freesplatter-scene.safetensors', local_dir='./ckpts/FreeSplatter')
@@ -141,7 +145,7 @@ class FreeSplatterRunner:
             for key in f.keys():
                 state_dict[key] = f.get_tensor(key)
         model.load_state_dict(state_dict, strict=True)
-        self.freesplatter_scene = model.eval().to(device)
+        self.freesplatter_scene = model.eval().to(self.device_main)
 
     @torch.inference_mode()
     def run_segmentation(

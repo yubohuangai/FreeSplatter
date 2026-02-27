@@ -16,8 +16,13 @@ os.makedirs('./ckpts/Hunyuan3D-1', exist_ok=True)
 snapshot_download('tencent/Hunyuan3D-1', repo_type='model', local_dir='./ckpts/Hunyuan3D-1')
 
 torch.set_grad_enabled(False)
-device = torch.device('cuda')
-runner = FreeSplatterRunner(device)
+main_device = torch.device('cuda:0')
+runner = FreeSplatterRunner(
+    device_main=main_device,
+    device_diff=torch.device('cuda:1'),
+    device_hunyuan=torch.device('cuda:2'),
+    device_rembg=torch.device('cuda:1'),
+)
 
 
 _HEADER_ = '''
