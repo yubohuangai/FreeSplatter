@@ -29,7 +29,7 @@ runner = FreeSplatterRunner(
     device_main=main_device,
     device_diff=torch.device('cuda:1'),
     device_hunyuan=torch.device('cuda:2'),
-    device_rembg=torch.device('cuda:1'),
+    device_rembg=torch.device('cpu'),
 )
 
 
